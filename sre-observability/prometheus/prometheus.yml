@@ -6,3 +6,8 @@ scrape_configs:
     static_configs:
       - targets:
           - "prometheus:9090"
+
+  - job_name: "sre-api"
+    static_configs:
+      - targets:
+          - "sre-api:8000"
