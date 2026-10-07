@@ -21,6 +21,14 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana-data:/var/lib/grafana
 
+  api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: sre-api
+    ports:
+      - "8000:8000"
+
 volumes:
   prometheus-data:
   grafana-data:
