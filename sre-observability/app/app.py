@@ -1,7 +1,41 @@
-from flask import Flask, Response
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+import time
+from flask import Flask, Response, request, g
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
+
+http_request_total = Counter(
+    name="http_request_total",
+    documentation="Total number of HTTP requests",
+    labelnames=["method", "endpoint"],
+)
+
+http_request_duration_seconds = Histogram(
+    name="http_request_duration_seconds",
+    documentation="HTTP request duration in seconds",
+    labelnames=["method", "endpoint"],
+)
+
+
+@app.before_request
+def before_request():
+    g.start_time = time.perf_counter()
+
+    http_request_total.labels(
+        method=request.method,
+        endpoint=request.path,
+    ).inc()
+
+
+@app.after_request
+def after_request(response):
+    duration = time.perf_counter() - g.start_time
+
+    http_request_duration_seconds.labels(
+        method=request.method, endpoint=request.path
+    ).observe(duration)
+
+    return response
 
 
 @app.get("/")
