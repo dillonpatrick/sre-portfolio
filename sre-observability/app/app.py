@@ -26,15 +26,16 @@ http_request_duration_seconds = Histogram(
 def before_request():
     g.start_time = time.perf_counter()
 
-    http_request_total.labels(
-        method=request.method,
-        endpoint=request.path,
-    ).inc()
-
 
 @app.after_request
 def after_request(response):
     duration = time.perf_counter() - g.start_time
+
+    http_request_total.labels(
+        method=request.method,
+        endpoint=request.path,
+        status_code=str(response.status_code),
+    ).inc()
 
     http_request_duration_seconds.labels(
         method=request.method, endpoint=request.path
