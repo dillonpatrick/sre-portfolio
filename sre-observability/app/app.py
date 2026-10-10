@@ -12,7 +12,7 @@ app = Flask(__name__)
 http_request_total = Counter(
     name="http_request_total",
     documentation="Total number of HTTP requests",
-    labelnames=["method", "endpoint"],
+    labelnames=["method", "endpoint", "status_code"],
 )
 
 http_request_duration_seconds = Histogram(
