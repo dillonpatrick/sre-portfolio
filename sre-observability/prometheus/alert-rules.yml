@@ -1,0 +1,16 @@
+groups:
+  - name: sre-api-alerts
+    rules:
+      - alert: HighHTTP5xxErrorRate
+        expr: |
+          (
+            sum(rate(http_request_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_request_total[5m]))
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          sumary: "High HTTP 5xx error rate"
+          description: "More than 5% of HTTP requests are returning 5xx errors."
