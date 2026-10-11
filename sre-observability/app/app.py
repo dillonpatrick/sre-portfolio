@@ -54,6 +54,11 @@ def health():
     return {"status": "healthy"}
 
 
+@app.get("/simulate-error")
+def simulate_error():
+    return {"status": "error"}, 500
+
+
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
