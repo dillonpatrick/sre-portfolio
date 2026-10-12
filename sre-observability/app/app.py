@@ -59,6 +59,12 @@ def simulate_error():
     return {"status": "error"}, 500
 
 
+@app.get("/simulate-slow")
+def simutale_slow():
+    time.sleep(0.3)
+    return {"status": "slow"}
+
+
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
