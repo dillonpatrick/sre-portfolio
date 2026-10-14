@@ -1,5 +1,5 @@
 route:
-  receiver: "default"
+  receiver: "discord"
 
   group_by:
     - alertname
@@ -10,4 +10,7 @@ route:
   repeat_interval: 4h
 
 receivers:
-  - name: "default"
+  - name: "discord"
+    webhook_configs:
+      - url: "http://discord-adapter:5001/webhook"
+        send_resolved: true
