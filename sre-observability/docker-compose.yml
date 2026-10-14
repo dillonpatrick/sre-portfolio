@@ -30,6 +30,17 @@ services:
     ports:
       - "8000:8000"
 
+  discord-adapter:
+    build:
+      context: ./discord-adapter
+      dockerfile: Dockerfile
+    container_name: discord-adapter
+    environment:
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+    expose:
+      - "5001"
+    restart: unless-stopped
+
   alertmanager:
     image: prom/alertmanager:latest
     container_name: alertmanager
