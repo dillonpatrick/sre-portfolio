@@ -6,7 +6,12 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
+
+if not DISCORD_WEBHOOK_URL:
+    raise RuntimeError(
+        "Required environment variable DISCORD_WEBHOOK_URL is not set"
+    )
 
 
 @app.get("/health")
@@ -47,12 +52,22 @@ def webhook():
         messages.append(message)
 
     for message in messages:
-        response = requests.post(
-            DISCORD_WEBHOOK_URL,
-            json={"content": message[:2000]},
-            timeout=10,
-        )
-        response.raise_for_status
+        try:
+            response = requests.post(
+                DISCORD_WEBHOOK_URL,
+                json={"content": message[:2000]},
+                timeout=10,
+            )
+            response.raise_for_status
+        except requests.exceptions.Timeout:
+            app.logger.error("Timeout while sendind notification to Discord")
+            return jsonify({"error": "Discord request timed out"}), 504
+        except requests.exceptions.RequestException:
+            app.logger.exception("Failed to send notification to Discord")
+            return (
+                jsonify({"error": "Failed to send notification to Discord"}),
+                502,
+            )
 
     return jsonify({"status": "sent", "count": len(messages)}), 200
 
