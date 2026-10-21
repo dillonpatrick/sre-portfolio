@@ -58,7 +58,23 @@ def webhook():
                 json={"content": message[:2000]},
                 timeout=10,
             )
-            response.raise_for_status
+            if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After", "unknown")
+
+                app.logger.warning(
+                    "Discord rate limit reached; Retry-Afeter: %s seconds",
+                    retry_after,
+                )
+                return (
+                    jsonify(
+                        {
+                            "error": "Discord rate limit reached",
+                            "retry_after": retry_after,
+                        }
+                    ),
+                    503,
+                )
+            response.raise_for_status()
         except requests.exceptions.Timeout:
             app.logger.error("Timeout while sendind notification to Discord")
             return jsonify({"error": "Discord request timed out"}), 504
